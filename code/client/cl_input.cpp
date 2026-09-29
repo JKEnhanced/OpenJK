@@ -468,6 +468,17 @@ CL_MouseEvent
 */
 void CL_MouseEvent( int dx, int dy, int time ) {
 	if ( Key_GetCatcher( ) & KEYCATCH_UI ) {
+		if ( cl_mouseAspectScaling->integer && cls.glconfig.vidWidth > 0 && cls.glconfig.vidHeight > 0 ) {
+			// menus use a 640x480 virtual screen, so scale window pixels down to it and carry
+			// the fraction over so slow movements aren't lost to truncation
+			static float fracX, fracY;
+			const float x = dx * ( SCREEN_WIDTH / (float)cls.glconfig.vidWidth ) + fracX;
+			const float y = dy * ( SCREEN_HEIGHT / (float)cls.glconfig.vidHeight ) + fracY;
+			dx = (int)x;
+			dy = (int)y;
+			fracX = x - dx;
+			fracY = y - dy;
+		}
 		_UI_MouseEvent( dx, dy );
 	}
 	else {
